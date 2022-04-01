@@ -1,22 +1,26 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlazingPizza;
-
-[Route("specials")]
-[ApiController]
-public class SpecialsController : Controller
+namespace BlazingPizza
 {
-    private readonly PizzaStoreContext _db;
-
-    public SpecialsController(PizzaStoreContext db)
+    [Route("specials")]
+    [ApiController]
+    public class SpecialsController : Controller
     {
-        _db = db;
-    }
+        private readonly PizzaStoreContext _db;
 
-    [HttpGet]
-    public async Task<ActionResult<List<PizzaSpecial>>> GetSpecials()
-    {
-        return (await _db.Specials.ToListAsync()).OrderByDescending(s => s.BasePrice).ToList();
+        public SpecialsController(PizzaStoreContext db)
+        {
+            _db = db;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<PizzaSpecial>>> GetSpecials()
+        {
+            return (await _db.Specials.ToListAsync()).OrderByDescending(s => s.BasePrice).ToList();
+        }
     }
 }

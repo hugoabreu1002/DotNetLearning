@@ -44,13 +44,13 @@
         NavigationManager.NavigateTo($"myorders/{newOrderId}");
     }
     
-    async Task CheckSubmission()
+    private async Task CheckSubmission(EditContext editContext)
     {
         var model = editContext.Model as Address;
         isSubmitting = true;
         if (string.IsNullOrWhitespace(model?.Name) || 
             string.IsNullOrWhitespace(model?.Line1) ||
-            string.IsNullOrWhiteSpace(model?.PostalCode)
+            string.IsNullOrWhitespace(model?.PostalCode)
         {
             isError = true;
         } 
@@ -59,6 +59,6 @@
             isError = false;
             await PlaceOrder();
         }
-        isSubmitting = false;
+    isSubmitting = false;
     } 
 }

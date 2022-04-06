@@ -42,18 +42,15 @@
             Pizza.Size = 24;
             if (firstRender)
             {
-            await JS.InvokeVoidAsync("disableElement", sizeRange);
+                await JS.InvokeVoidAsync("disableElement", sizeRange);
             }
         }
     } 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
+    protected override void OnInitialized() {
         if (Pizza.Special.Name == "Margherita Family Size") {
-            if (firstRender)
-            {
-                await JS.InvokeVoidAsync("disableElement", sizeRange);
-            }
+            Pizza.DefaultSize = 24;
+            Pizza.Size = 24;
         }
     }
 }

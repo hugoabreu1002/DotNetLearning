@@ -2,63 +2,62 @@
 @inject OrderState OrderState
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@implements IDisposable
+
 
 <div class="main">
-    <EditForm Model=Order.DeliveryAddress OnSubmit=CheckSubmission>
-        <div class="checkout-cols">
-            <div class="checkout-order-details">
-                <h4>Review order</h4>
-                <OrderReview Order="Order" />
-            </div>
-
-            <div class="checkout-delivery-address">
-                <h4>Deliver to...</h4>
-                <AddressEditor Address="Order.DeliveryAddress" />
-            </div>
-
-            <div class="checkout-delivery-address">
-                <h4>Deliver to...</h4>
-                    @if (isError) {
-                        <div class="alert alert-danger">Please enter a name and address.</div>
-                    }
-                <AddressEditor Address="Order.DeliveryAddress" />
-            </div>
+  <EditForm EditContext=editContext OnValidSubmit=PlaceOrder> 
+    <div class="checkout-cols">
+        <div class="checkout-order-details">
+            <h4>Review order</h4>
+            <OrderReview Order="Order" />
         </div>
 
-        <button class="checkout-button btn btn-warning" disabled=@isSubmitting>
-            Place order
-        </button>
-    </EditForm>
+        <div class="checkout-delivery-address">
+            <h4>Deliver to...</h4>
+            @if (isError) {
+              <div class="alert alert-danger">Please enter a vaild name and address.</div>
+            }
+            <AddressEditor Address="Order.DeliveryAddress" />
+        </div>
+    </div>
+
+    <button class="checkout-button btn btn-warning" type="Submit" disabled=@isError>
+        Place order
+    </button>
+
+    <DataAnnotationsValidator />
+  </EditForm>
 </div>
 
 @code {
     Order Order => OrderState.Order;
-    bool isSubmitting;
-    bool isError = false;
 
-    async Task PlaceOrder()
+    bool isError = true;
+    private EditContext editContext;
+
+    protected override void OnInitialized()
     {
-        var response = await HttpClient.PostAsJsonAsync(NavigationManager.BaseUri + "orders", OrderState.Order);
-        var newOrderId= await response.Content.ReadFromJsonAsync<int>();
-        OrderState.ResetOrder();
-        NavigationManager.NavigateTo($"myorders/{newOrderId}");
+        editContext = new(Order.DeliveryAddress);
+        editContext.OnFieldChanged += HandleFieldChanged;
     }
-    
-    private async Task CheckSubmission(EditContext editContext)
-    {
-        var model = editContext.Model as Address;
-        isSubmitting = true;
-        if (string.IsNullOrWhitespace(model?.Name) || 
-            string.IsNullOrWhitespace(model?.Line1) ||
-            string.IsNullOrWhitespace(model?.PostalCode)
-        {
-            isError = true;
-        } 
-        else 
-        {
-            isError = false;
-            await PlaceOrder();
-        }
-    isSubmitting = false;
-    } 
+
+  async Task PlaceOrder()
+  {
+    var response = await HttpClient.PostAsJsonAsync(NavigationManager.BaseUri + "orders", OrderState.Order);
+    var newOrderId= await response.Content.ReadFromJsonAsync<int>();
+    OrderState.ResetOrder();
+    NavigationManager.NavigateTo($"myorders/{newOrderId}");
+  } 
+
+  private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+  {
+      isError = !editContext.Validate();
+      StateHasChanged();
+  }
+
+  public void Dispose()
+  {
+      editContext.OnFieldChanged -= HandleFieldChanged;
+  }
 }

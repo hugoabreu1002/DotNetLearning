@@ -31,7 +31,6 @@
     <script src="_framework/blazor.server.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert@latest/dist/sweetalert.min.js"></script>
 
-
     <script lang="javascript">
         var objectRef;
 
@@ -49,6 +48,8 @@
                 document.querySelector('#progressSpinner').remove();
             }
         };
+        
+        window.disableElement = (element) => element.disabled = "disabled";
     </script> 
 
 </body>
